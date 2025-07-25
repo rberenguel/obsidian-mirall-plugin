@@ -1,0 +1,10 @@
+{
+	"id": "proj",
+	"name": "Proj",
+	"version": "0.1.0",
+	"minAppVersion": "0.15.0",
+	"description": "A plugin for Obsidian to link notes to projects.",
+	"author": "Ruben Berenguel",
+	"authorUrl": "https://www.mostlymaths.net",
+	"isDesktopOnly": false
+}
