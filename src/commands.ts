@@ -8,13 +8,26 @@ export function addProjCommands(plugin: ProjPlugin) {
 		name: "Tag for project",
 		hotkeys: [{ modifiers: ["Mod"], key: "j" }],
 		editorCallback: (editor: Editor, view: MarkdownView) => {
-			new ProjectChooserModal(plugin.app, (project) => {
-				const file = view.file;
-				if (!file) {
-					new Notice("No active file.");
-					return;
-				}
+			const file = view.file;
+			if (!file) {
+				new Notice("No active file.");
+				return;
+			}
 
+			if (editor.getValue().trim() === "") {
+				const newProjId = file.basename.toLowerCase().replace(/\s/g, "-");
+				const frontmatter = `---
+proj: open
+proj-id: ${newProjId}
+---
+
+`;
+				editor.setValue(frontmatter);
+				new Notice("Added project frontmatter.");
+				return;
+			}
+
+			new ProjectChooserModal(plugin.app, plugin, (project) => {
 				const projectFile = plugin.app.vault.getAbstractFileByPath(project.path);
 				if (!projectFile || !(projectFile instanceof TFile)) {
 					new Notice("Project file not found or is not a markdown file.");
@@ -48,7 +61,8 @@ export function addProjCommands(plugin: ProjPlugin) {
 						const cursor = editor.getCursor();
 						const line = editor.getLine(cursor.line);
 						const blockId = `^proj-${projId}-${Date.now().toString(36)}`;
-						editor.setLine(cursor.line, `${line} ${blockId}`);
+						const newLine = line.trim() === "" ? `${blockId}` : `${line} ${blockId}`;
+						editor.setLine(cursor.line, newLine);
 						blockIds.push(blockId);
 					}
 
@@ -56,18 +70,49 @@ export function addProjCommands(plugin: ProjPlugin) {
 						return;
 					}
 
-					const transclusions = blockIds.map(id => `![[${file.basename}#${id}]]`).join("\n");
-                    const header = `#### [[${file.basename}]]\n`;
-                    const frontmatterEnd = cache?.frontmatterPosition?.end?.offset;
-                    let newContent;
+					const transclusions = blockIds.map(id => `![[${file.basename}#${id}]]`);
+					const header = `#### [[${file.basename}]]`;
+					let newContent;
 
-                    if (frontmatterEnd) {
-                        const before = content.slice(0, frontmatterEnd);
-                        const after = content.slice(frontmatterEnd);
-                        newContent = `${before}\n\n${header}${transclusions}${after}`;
-                    } else {
-                        newContent = `${header}${transclusions}\n${content}`;
-                    }
+					const fileContentLines = content.split('\n');
+					const headerLineIndex = fileContentLines.findIndex(line => line.trim() === header);
+
+					if (headerLineIndex !== -1) {
+						let endOfSectionIndex = fileContentLines.length;
+						for (let i = headerLineIndex + 1; i < fileContentLines.length; i++) {
+							if (fileContentLines[i].trim().startsWith('#### ')) {
+								endOfSectionIndex = i;
+								break;
+							}
+						}
+
+						let insertionLine = endOfSectionIndex;
+						while(insertionLine > headerLineIndex + 1 && fileContentLines[insertionLine - 1].trim() === '') {
+							insertionLine--;
+						}
+
+						const itemsToInsert = transclusions.join('\n\n').split('\n');
+
+						if (insertionLine > headerLineIndex + 1) {
+							fileContentLines.splice(insertionLine, 0, '', ...itemsToInsert);
+						} else {
+							fileContentLines.splice(insertionLine, 0, ...itemsToInsert);
+						}
+						newContent = fileContentLines.join('\n');
+
+					} else {
+						const transclusionsText = transclusions.join('\n\n');
+						const headerWithNewline = header + '\n';
+						const frontmatterEnd = cache?.frontmatterPosition?.end?.offset;
+
+						if (frontmatterEnd) {
+							const before = content.slice(0, frontmatterEnd);
+							const after = content.slice(frontmatterEnd);
+							newContent = `${before}\n\n${headerWithNewline}${transclusionsText}${after}`;
+						} else {
+							newContent = `${headerWithNewline}${transclusionsText}\n${content}`;
+						}
+					}
 
 					plugin.app.vault.modify(projectFile, newContent);
 					new Notice(`Tagged for project: ${project.basename}`);

@@ -10,6 +10,27 @@ import { RangeSetBuilder } from "@codemirror/state";
 import { setIcon, App } from "obsidian";
 import ProjPlugin from "../main";
 
+const solarizedColors = [
+	"var(--proj-cyan)",
+	"var(--proj-red)",
+	"var(--proj-orange)",
+	"var(--proj-yellow)",
+	"var(--proj-blue)",
+	"var(--proj-green)",
+	"var(--proj-magenta)",
+	"var(--proj-violet)",
+];
+
+function simpleHash(str: string): number {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		const char = str.charCodeAt(i);
+		hash = (hash << 5) - hash + char;
+		hash |= 0; // Convert to 32bit integer
+	}
+	return Math.abs(hash);
+}
+
 class ProjectCapsuleWidget extends WidgetType {
 	constructor(
 		private readonly app: App,
@@ -29,6 +50,10 @@ class ProjectCapsuleWidget extends WidgetType {
 
 		const textEl = capsule.createSpan({ cls: "proj-capsule-text" });
 		textEl.setText(this.projectId);
+
+		const colorIndex = simpleHash(this.projectId) % solarizedColors.length;
+		textEl.style.color = solarizedColors[colorIndex];
+
 
 		capsule.setAttribute("aria-label", `Project: ${this.projectId}`);
 
@@ -79,7 +104,7 @@ export function buildProjectViewPlugin(plugin: ProjPlugin) {
 					let pos = from;
 					while (pos <= to) {
 						const line = view.state.doc.lineAt(pos);
-						const match = line.text.match(/\s\^(proj-((?:[\w-]*[\w])+)-[a-z0-9]+)\s*$/);
+						const match = line.text.match(/(?:\s?)\^(proj-((?:[\w-]*[\w])+)-[a-z0-9]+)\s*$/);
 
 						if (match && match.index !== undefined) {
 							const markerStart = line.from + match.index;

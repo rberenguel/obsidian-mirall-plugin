@@ -5,10 +5,12 @@ import { buildProjectViewPlugin } from "./src/view";
 
 export interface ProjPluginSettings {
 	capsuleIcon: string;
+	excludeProjectStates: string;
 }
 
 const DEFAULT_SETTINGS: ProjPluginSettings = {
 	capsuleIcon: "list-checks",
+	excludeProjectStates: "closed,cancelled",
 };
 
 export default class ProjPlugin extends Plugin {
