@@ -104,30 +104,34 @@ export function buildProjectViewPlugin(plugin: ProjPlugin) {
 					let pos = from;
 					while (pos <= to) {
 						const line = view.state.doc.lineAt(pos);
-						const match = line.text.match(/(?:\s?)\^(proj-((?:[\w-]*[\w])+)-[a-z0-9]+)\s*$/);
+						const match = line.text.match(/\s\^([a-zA-Z0-9-]+)\s*$/);
 
 						if (match && match.index !== undefined) {
-							const markerStart = line.from + match.index;
-							const markerEnd = markerStart + match[0].length;
+							const blockId = match[1];
+							const parts = blockId.split('-');
+							if (parts.length > 2 && parts[0] === 'proj') {
+								const markerStart = line.from + match.index;
+								const markerEnd = markerStart + match[0].length;
 
-							if (
-								!(
-									selection.from < markerEnd &&
-									selection.to > markerStart
-								)
-							) {
-								const projectId = match[2];
-								builder.add(
-									markerStart,
-									markerEnd,
-									Decoration.replace({
-										widget: new ProjectCapsuleWidget(
-											plugin.app,
-											projectId,
-											plugin.settings.capsuleIcon,
-										),
-									}),
-								);
+								if (
+									!(
+										selection.from < markerEnd &&
+										selection.to > markerStart
+									)
+								) {
+									const projectId = parts.slice(1, -1).join('-');
+									builder.add(
+										markerStart,
+										markerEnd,
+										Decoration.replace({
+											widget: new ProjectCapsuleWidget(
+												plugin.app,
+												projectId,
+												plugin.settings.capsuleIcon,
+											),
+										}),
+									);
+								}
 							}
 						}
 						pos = line.to + 1;
