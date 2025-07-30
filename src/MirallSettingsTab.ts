@@ -1,10 +1,10 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import ProjPlugin from "../main";
+import MirallPlugin from "../main";
 
-export class ProjSettingTab extends PluginSettingTab {
-	plugin: ProjPlugin;
+export class MirallSettingTab extends PluginSettingTab {
+	plugin: MirallPlugin;
 
-	constructor(app: App, plugin: ProjPlugin) {
+	constructor(app: App, plugin: MirallPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -13,11 +13,11 @@ export class ProjSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
-		containerEl.createEl("h2", { text: "Proj Plugin Settings" });
+		containerEl.createEl("h2", { text: "Mirall Plugin Settings" });
 
 		new Setting(containerEl)
 			.setName("Capsule Icon")
-			.setDesc("The icon to display in the project capsule.")
+			.setDesc("The icon to display in the capsule.")
 			.addText((text) =>
 				text
 					.setPlaceholder("list-checks")
@@ -30,14 +30,14 @@ export class ProjSettingTab extends PluginSettingTab {
 			);
 		
 		new Setting(containerEl)
-			.setName("Exclude Project States")
-			.setDesc("A comma-separated list of states to exclude from the project chooser.")
+			.setName("Exclude Page States")
+			.setDesc("A comma-separated list of states to exclude from the page chooser.")
 			.addText((text) =>
 				text
 					.setPlaceholder("closed,cancelled")
-					.setValue(this.plugin.settings.excludeProjectStates)
+					.setValue(this.plugin.settings.excludeMirallStates)
 					.onChange(async (value) => {
-						this.plugin.settings.excludeProjectStates = value.trim();
+						this.plugin.settings.excludeMirallStates = value.trim();
 						await this.plugin.saveSettings();
 					}),
 			);

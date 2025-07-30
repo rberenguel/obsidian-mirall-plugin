@@ -11,7 +11,7 @@ if you want to view the source, please visit the github repository of this plugi
 */
 `;
 
-const vaultPath = "/Users/ruben/Library/Mobile Documents/iCloud~md~obsidian/Documents/git-notes-in-icloud/.obsidian/plugins/proj";
+const vaultPath = "/Users/ruben/Library/Mobile Documents/iCloud~md~obsidian/Documents/git-notes-in-icloud/.obsidian/plugins/mirall";
 const prod = (process.argv[2] === "production");
 
 const copyPlugin = {

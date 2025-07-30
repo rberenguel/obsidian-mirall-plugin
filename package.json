@@ -1,7 +1,7 @@
 {
-	"name": "proj",
-	"version": "0.2.1",
-	"description": "A plugin for Obsidian to link notes to projects.",
+	"name": "mirall",
+	"version": "0.2.2",
+	"description": "A plugin for Obsidian to link notes to pages.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -10,7 +10,6 @@
 	},
 	"keywords": [
 		"obsidian",
-		"project",
 		"linking"
 	],
 	"author": "Ruben Berenguel",

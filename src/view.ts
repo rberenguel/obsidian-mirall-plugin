@@ -8,17 +8,17 @@ import {
 } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 import { setIcon, App } from "obsidian";
-import ProjPlugin from "../main";
+import MirallPlugin from "../main";
 
 const solarizedColors = [
-	"var(--proj-cyan)",
-	"var(--proj-red)",
-	"var(--proj-orange)",
-	"var(--proj-yellow)",
-	"var(--proj-blue)",
-	"var(--proj-green)",
-	"var(--proj-magenta)",
-	"var(--proj-violet)",
+	"var(--mrll-cyan)",
+	"var(--mrll-red)",
+	"var(--mrll-orange)",
+	"var(--mrll-yellow)",
+	"var(--mrll-blue)",
+	"var(--mrll-green)",
+	"var(--mrll-magenta)",
+	"var(--mrll-violet)",
 ];
 
 function simpleHash(str: string): number {
@@ -31,10 +31,10 @@ function simpleHash(str: string): number {
 	return Math.abs(hash);
 }
 
-class ProjectCapsuleWidget extends WidgetType {
+class MirallCapsuleWidget extends WidgetType {
 	constructor(
 		private readonly app: App,
-		private readonly projectId: string,
+		private readonly pageId: string,
 		private readonly icon: string,
 	) {
 		super();
@@ -42,30 +42,30 @@ class ProjectCapsuleWidget extends WidgetType {
 
 	toDOM(view: EditorView): HTMLElement {
 		const capsule = document.createElement("span");
-		capsule.className = "proj-capsule";
+		capsule.className = "mrll-capsule";
 		capsule.style.cursor = "pointer";
 
-		const iconEl = capsule.createSpan({ cls: "proj-capsule-icon" });
+		const iconEl = capsule.createSpan({ cls: "mrll-capsule-icon" });
 		setIcon(iconEl, this.icon);
 
-		const textEl = capsule.createSpan({ cls: "proj-capsule-text" });
-		textEl.setText(this.projectId);
+		const textEl = capsule.createSpan({ cls: "mrll-capsule-text" });
+		textEl.setText(this.pageId);
 
-		const colorIndex = simpleHash(this.projectId) % solarizedColors.length;
+		const colorIndex = simpleHash(this.pageId) % solarizedColors.length;
 		textEl.style.color = solarizedColors[colorIndex];
 
 
-		capsule.setAttribute("aria-label", `Project: ${this.projectId}`);
+		capsule.setAttribute("aria-label", `Page: ${this.pageId}`);
 
 		capsule.addEventListener("mousedown", (event) => {
 			event.preventDefault();
-			const projectFile = this.app.vault.getMarkdownFiles().find(file => {
+			const pageFile = this.app.vault.getMarkdownFiles().find(file => {
 				const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-				return frontmatter && frontmatter["proj-id"] === this.projectId;
+				return frontmatter && frontmatter["mirall-id"] === this.pageId;
 			});
 
-			if (projectFile) {
-				this.app.workspace.openLinkText(projectFile.path, "", false);
+			if (pageFile) {
+				this.app.workspace.openLinkText(pageFile.path, "", false);
 			}
 		});
 
@@ -77,7 +77,7 @@ class ProjectCapsuleWidget extends WidgetType {
 	}
 }
 
-export function buildProjectViewPlugin(plugin: ProjPlugin) {
+export function buildMirallViewPlugin(plugin: MirallPlugin) {
 	return ViewPlugin.fromClass(
 		class {
 			decorations: DecorationSet;
@@ -109,7 +109,7 @@ export function buildProjectViewPlugin(plugin: ProjPlugin) {
 						if (match && match.index !== undefined) {
 							const blockId = match[1];
 							const parts = blockId.split('-');
-							if (parts.length > 2 && parts[0] === 'proj') {
+							if (parts.length > 2 && parts[0] === 'mrll') {
 								const markerStart = line.from + match.index;
 								const markerEnd = markerStart + match[0].length;
 
@@ -119,14 +119,14 @@ export function buildProjectViewPlugin(plugin: ProjPlugin) {
 										selection.to > markerStart
 									)
 								) {
-									const projectId = parts.slice(1, -1).join('-');
+									const pageId = parts.slice(1, -1).join('-');
 									builder.add(
 										markerStart,
 										markerEnd,
 										Decoration.replace({
-											widget: new ProjectCapsuleWidget(
+											widget: new MirallCapsuleWidget(
 												plugin.app,
-												projectId,
+												pageId,
 												plugin.settings.capsuleIcon,
 											),
 										}),

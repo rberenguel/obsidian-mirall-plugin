@@ -1,34 +1,30 @@
 import { Plugin } from "obsidian";
-import { addProjCommands } from "./src/commands";
-import { ProjSettingTab } from "./src/SettingsTab";
-import { buildProjectViewPlugin } from "./src/view";
+import { addMirallCommands } from "./src/mirall-commands";
+import { MirallSettingTab } from "./src/MirallSettingsTab";
+import { buildMirallViewPlugin } from "./src/view";
 
-export interface ProjPluginSettings {
+export interface MirallPluginSettings {
 	capsuleIcon: string;
-	excludeProjectStates: string;
+	excludeMirallStates: string;
 }
 
-const DEFAULT_SETTINGS: ProjPluginSettings = {
+const DEFAULT_SETTINGS: MirallPluginSettings = {
 	capsuleIcon: "list-checks",
-	excludeProjectStates: "closed,cancelled",
+	excludeMirallStates: "closed,cancelled",
 };
 
-export default class ProjPlugin extends Plugin {
-	settings: ProjPluginSettings;
+export default class MirallPlugin extends Plugin {
+	settings: MirallPluginSettings;
 
 	async onload() {
 		await this.loadSettings();
-		this.addSettingTab(new ProjSettingTab(this.app, this));
-		this.registerEditorExtension(buildProjectViewPlugin(this));
-		addProjCommands(this);
+		this.addSettingTab(new MirallSettingTab(this.app, this));
+		this.registerEditorExtension(buildMirallViewPlugin(this));
+		addMirallCommands(this);
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData(),
-		);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
 	async saveSettings() {

@@ -1,9 +1,9 @@
 {
-	"id": "proj",
-	"name": "Proj",
-	"version": "0.2.1",
+	"id": "mirall",
+	"name": "Mirall",
+	"version": "0.2.2",
 	"minAppVersion": "0.15.0",
-	"description": "A plugin for Obsidian to link notes to projects.",
+	"description": "A plugin for Obsidian to link notes to pages.",
 	"author": "Ruben Berenguel",
 	"authorUrl": "https://www.mostlymaths.net",
 	"isDesktopOnly": false

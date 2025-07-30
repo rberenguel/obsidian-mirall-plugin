@@ -1,11 +1,11 @@
 import { Editor, MarkdownView, Notice, TFile } from "obsidian";
-import ProjPlugin from "../main";
-import { ProjectChooserModal } from "./ProjectChooserModal";
+import MirallPlugin from "../main";
+import { MirallChooserModal } from "./MirallChooserModal";
 
-export function addProjCommands(plugin: ProjPlugin) {
+export function addMirallCommands(plugin: MirallPlugin) {
 	plugin.addCommand({
-		id: "tag-for-project",
-		name: "Tag for project",
+		id: "tag-for-page",
+		name: "Tag for page",
 		hotkeys: [{ modifiers: ["Mod"], key: "j" }],
 		editorCallback: (editor: Editor, view: MarkdownView) => {
 			const file = view.file;
@@ -15,31 +15,31 @@ export function addProjCommands(plugin: ProjPlugin) {
 			}
 
 			if (editor.getValue().trim() === "") {
-				const newProjId = file.basename.toLowerCase().replace(/\s/g, "-");
+				const newMirallId = file.basename.toLowerCase().replace(/\s/g, "-");
 				const frontmatter = `---
-proj: open
-proj-id: ${newProjId}
+mirall: open
+mirall-id: ${newMirallId}
 ---
 
 `;
 				editor.setValue(frontmatter);
-				new Notice("Added project frontmatter.");
+				new Notice("Added page frontmatter.");
 				return;
 			}
 
-			new ProjectChooserModal(plugin.app, plugin, (project) => {
-				const projectFile = plugin.app.vault.getAbstractFileByPath(project.path);
-				if (!projectFile || !(projectFile instanceof TFile)) {
-					new Notice("Project file not found or is not a markdown file.");
+			new MirallChooserModal(plugin.app, plugin, (page) => {
+				const pageFile = plugin.app.vault.getAbstractFileByPath(page.path);
+				if (!pageFile || !(pageFile instanceof TFile)) {
+					new Notice("Page file not found or is not a markdown file.");
 					return;
 				}
 
-				plugin.app.vault.read(projectFile).then(content => {
-					const cache = plugin.app.metadataCache.getFileCache(projectFile);
-					const projId = cache?.frontmatter ? cache.frontmatter["proj-id"] : undefined;
+				plugin.app.vault.read(pageFile).then(content => {
+					const cache = plugin.app.metadataCache.getFileCache(pageFile);
+					const pageId = cache?.frontmatter ? cache.frontmatter["mirall-id"] : undefined;
 
-					if (!projId) {
-						new Notice("Project ID not found in project file's frontmatter.");
+					if (!pageId) {
+						new Notice("Page ID not found in page file's frontmatter.");
 						return;
 					}
 
@@ -52,7 +52,7 @@ proj-id: ${newProjId}
 							const line = lines[i];
 							if (line.trim() === "") continue;
 
-							const blockId = `^proj-${projId}-${Date.now().toString(36)}${i}`;
+							const blockId = `^mrll-${pageId}-${Date.now().toString(36)}${i}`;
 							lines[i] = `${line} ${blockId}`;
 							blockIds.push(blockId);
 						}
@@ -60,7 +60,7 @@ proj-id: ${newProjId}
 					} else {
 						const cursor = editor.getCursor();
 						const line = editor.getLine(cursor.line);
-						const blockId = `^proj-${projId}-${Date.now().toString(36)}`;
+						const blockId = `^mrll-${pageId}-${Date.now().toString(36)}`;
 						const newLine = line.trim() === "" ? `${blockId}` : `${line} ${blockId}`;
 						editor.setLine(cursor.line, newLine);
 						blockIds.push(blockId);
@@ -114,8 +114,8 @@ proj-id: ${newProjId}
 						}
 					}
 
-					plugin.app.vault.modify(projectFile, newContent);
-					new Notice(`Tagged for project: ${project.basename}`);
+					plugin.app.vault.modify(pageFile, newContent);
+					new Notice(`Tagged for page: ${page.basename}`);
 				});
 			}).open();
 		},

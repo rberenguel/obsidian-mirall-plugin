@@ -1,23 +1,23 @@
 import { App, FuzzySuggestModal, TFile } from "obsidian";
-import ProjPlugin from "../main";
+import MirallPlugin from "../main";
 
-export class ProjectChooserModal extends FuzzySuggestModal<TFile> {
+export class MirallChooserModal extends FuzzySuggestModal<TFile> {
 	constructor(
 		app: App,
-		private plugin: ProjPlugin,
+		private plugin: MirallPlugin,
 		private onChoose: (result: TFile) => void
 	) {
 		super(app);
 	}
 
 	getItems(): TFile[] {
-		const excludedStates = this.plugin.settings.excludeProjectStates.split(",").map(s => s.trim()).filter(Boolean);
+		const excludedStates = this.plugin.settings.excludeMirallStates.split(",").map(s => s.trim()).filter(Boolean);
 		return this.app.vault.getMarkdownFiles().filter(file => {
 			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-			if (!frontmatter || !frontmatter.proj) {
+			if (!frontmatter || !frontmatter.mirall) {
 				return false;
 			}
-			return !excludedStates.includes(frontmatter.proj);
+			return !excludedStates.includes(frontmatter.mirall);
 		});
 	}
 
