@@ -54,13 +54,13 @@ class MirallCapsuleWidget extends WidgetType {
 		const colorIndex = simpleHash(this.pageId) % solarizedColors.length;
 		textEl.style.color = solarizedColors[colorIndex];
 
-
 		capsule.setAttribute("aria-label", `Page: ${this.pageId}`);
 
 		capsule.addEventListener("mousedown", (event) => {
 			event.preventDefault();
-			const pageFile = this.app.vault.getMarkdownFiles().find(file => {
-				const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+			const pageFile = this.app.vault.getMarkdownFiles().find((file) => {
+				const frontmatter =
+					this.app.metadataCache.getFileCache(file)?.frontmatter;
 				return frontmatter && frontmatter["mirall-id"] === this.pageId;
 			});
 
@@ -73,7 +73,7 @@ class MirallCapsuleWidget extends WidgetType {
 	}
 
 	ignoreEvent(event: Event): boolean {
-		return event instanceof MouseEvent && event.type === 'mousedown';
+		return event instanceof MouseEvent && event.type === "mousedown";
 	}
 }
 
@@ -99,17 +99,26 @@ export function buildMirallViewPlugin(plugin: MirallPlugin) {
 			buildDecorations(view: EditorView): DecorationSet {
 				const builder = new RangeSetBuilder<Decoration>();
 				const selection = view.state.selection.main;
-
+				console.log(view.dom.parentElement);
+				const isSourceMode =
+					!view.dom.parentElement?.classList.contains(
+						"is-live-preview",
+					);
+				if (isSourceMode) {
+					return builder.finish();
+				}
 				for (const { from, to } of view.visibleRanges) {
 					let pos = from;
 					while (pos <= to) {
 						const line = view.state.doc.lineAt(pos);
-						const match = line.text.match(/\s\^([a-zA-Z0-9-]+)\s*$/);
+						const match = line.text.match(
+							/\s\^([a-zA-Z0-9-]+)\s*$/,
+						);
 
 						if (match && match.index !== undefined) {
 							const blockId = match[1];
-							const parts = blockId.split('-');
-							if (parts.length > 2 && parts[0] === 'mrll') {
+							const parts = blockId.split("-");
+							if (parts.length > 2 && parts[0] === "mrll") {
 								const markerStart = line.from + match.index;
 								const markerEnd = markerStart + match[0].length;
 
@@ -119,7 +128,7 @@ export function buildMirallViewPlugin(plugin: MirallPlugin) {
 										selection.to > markerStart
 									)
 								) {
-									const pageId = parts.slice(1, -1).join('-');
+									const pageId = parts.slice(1, -1).join("-");
 									builder.add(
 										markerStart,
 										markerEnd,

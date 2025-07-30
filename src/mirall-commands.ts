@@ -15,7 +15,9 @@ export function addMirallCommands(plugin: MirallPlugin) {
 			}
 
 			if (editor.getValue().trim() === "") {
-				const newMirallId = file.basename.toLowerCase().replace(/\s/g, "-");
+				const newMirallId = file.basename
+					.toLowerCase()
+					.replace(/\s/g, "-");
 				const frontmatter = `---
 mirall: open
 mirall-id: ${newMirallId}
@@ -28,18 +30,27 @@ mirall-id: ${newMirallId}
 			}
 
 			new MirallChooserModal(plugin.app, plugin, (page) => {
-				const pageFile = plugin.app.vault.getAbstractFileByPath(page.path);
+				const pageFile = plugin.app.vault.getAbstractFileByPath(
+					page.path,
+				);
 				if (!pageFile || !(pageFile instanceof TFile)) {
-					new Notice("Page file not found or is not a markdown file.");
+					new Notice(
+						"Page file not found or is not a markdown file.",
+					);
 					return;
 				}
 
-				plugin.app.vault.read(pageFile).then(content => {
-					const cache = plugin.app.metadataCache.getFileCache(pageFile);
-					const pageId = cache?.frontmatter ? cache.frontmatter["mirall-id"] : undefined;
+				plugin.app.vault.read(pageFile).then((content) => {
+					const cache =
+						plugin.app.metadataCache.getFileCache(pageFile);
+					const pageId = cache?.frontmatter
+						? cache.frontmatter["mirall-id"]
+						: undefined;
 
 					if (!pageId) {
-						new Notice("Page ID not found in page file's frontmatter.");
+						new Notice(
+							"Page ID not found in page file's frontmatter.",
+						);
 						return;
 					}
 
@@ -61,7 +72,10 @@ mirall-id: ${newMirallId}
 						const cursor = editor.getCursor();
 						const line = editor.getLine(cursor.line);
 						const blockId = `^mrll-${pageId}-${Date.now().toString(36)}`;
-						const newLine = line.trim() === "" ? `${blockId}` : `${line} ${blockId}`;
+						const newLine =
+							line.trim() === ""
+								? `${blockId}`
+								: `${line} ${blockId}`;
 						editor.setLine(cursor.line, newLine);
 						blockIds.push(blockId);
 					}
@@ -70,40 +84,64 @@ mirall-id: ${newMirallId}
 						return;
 					}
 
-					const transclusions = blockIds.map(id => `![[${file.basename}#${id}]]`);
+					const transclusions = blockIds.map(
+						(id) => `![[${file.basename}#${id}]]`,
+					);
 					const header = `#### [[${file.basename}]]`;
 					let newContent;
 
-					const fileContentLines = content.split('\n');
-					const headerLineIndex = fileContentLines.findIndex(line => line.trim() === header);
+					const fileContentLines = content.split("\n");
+					const headerLineIndex = fileContentLines.findIndex(
+						(line) => line.trim() === header,
+					);
 
 					if (headerLineIndex !== -1) {
 						let endOfSectionIndex = fileContentLines.length;
-						for (let i = headerLineIndex + 1; i < fileContentLines.length; i++) {
-							if (fileContentLines[i].trim().startsWith('#### ')) {
+						for (
+							let i = headerLineIndex + 1;
+							i < fileContentLines.length;
+							i++
+						) {
+							if (
+								fileContentLines[i].trim().startsWith("#### ")
+							) {
 								endOfSectionIndex = i;
 								break;
 							}
 						}
 
 						let insertionLine = endOfSectionIndex;
-						while(insertionLine > headerLineIndex + 1 && fileContentLines[insertionLine - 1].trim() === '') {
+						while (
+							insertionLine > headerLineIndex + 1 &&
+							fileContentLines[insertionLine - 1].trim() === ""
+						) {
 							insertionLine--;
 						}
 
-						const itemsToInsert = transclusions.join('\n\n').split('\n');
+						const itemsToInsert = transclusions
+							.join("\n\n")
+							.split("\n");
 
 						if (insertionLine > headerLineIndex + 1) {
-							fileContentLines.splice(insertionLine, 0, '', ...itemsToInsert);
+							fileContentLines.splice(
+								insertionLine,
+								0,
+								"",
+								...itemsToInsert,
+							);
 						} else {
-							fileContentLines.splice(insertionLine, 0, ...itemsToInsert);
+							fileContentLines.splice(
+								insertionLine,
+								0,
+								...itemsToInsert,
+							);
 						}
-						newContent = fileContentLines.join('\n');
-
+						newContent = fileContentLines.join("\n");
 					} else {
-						const transclusionsText = transclusions.join('\n\n');
-						const headerWithNewline = header + '\n';
-						const frontmatterEnd = cache?.frontmatterPosition?.end?.offset;
+						const transclusionsText = transclusions.join("\n\n");
+						const headerWithNewline = header + "\n";
+						const frontmatterEnd =
+							cache?.frontmatterPosition?.end?.offset;
 
 						if (frontmatterEnd) {
 							const before = content.slice(0, frontmatterEnd);

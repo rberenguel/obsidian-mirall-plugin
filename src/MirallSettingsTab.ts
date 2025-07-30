@@ -28,10 +28,12 @@ export class MirallSettingTab extends PluginSettingTab {
 						this.plugin.app.workspace.updateOptions();
 					}),
 			);
-		
+
 		new Setting(containerEl)
 			.setName("Exclude Page States")
-			.setDesc("A comma-separated list of states to exclude from the page chooser.")
+			.setDesc(
+				"A comma-separated list of states to exclude from the page chooser.",
+			)
 			.addText((text) =>
 				text
 					.setPlaceholder("closed,cancelled")

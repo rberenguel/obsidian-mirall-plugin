@@ -5,15 +5,19 @@ export class MirallChooserModal extends FuzzySuggestModal<TFile> {
 	constructor(
 		app: App,
 		private plugin: MirallPlugin,
-		private onChoose: (result: TFile) => void
+		private onChoose: (result: TFile) => void,
 	) {
 		super(app);
 	}
 
 	getItems(): TFile[] {
-		const excludedStates = this.plugin.settings.excludeMirallStates.split(",").map(s => s.trim()).filter(Boolean);
-		return this.app.vault.getMarkdownFiles().filter(file => {
-			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+		const excludedStates = this.plugin.settings.excludeMirallStates
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean);
+		return this.app.vault.getMarkdownFiles().filter((file) => {
+			const frontmatter =
+				this.app.metadataCache.getFileCache(file)?.frontmatter;
 			if (!frontmatter || !frontmatter.mirall) {
 				return false;
 			}

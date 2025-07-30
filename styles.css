@@ -5,7 +5,7 @@
 	color: var(--text-normal);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 0.1em;
-	padding: 0.1em 0.2em 0.0em 0.2em;
+	padding: 0.1em 0.2em 0em 0.2em;
 	font-size: 0.8em;
 	line-height: 1.3;
 	margin-left: 0.5em;
@@ -27,12 +27,12 @@
 }
 
 :root {
-    --mrll-yellow: #b58900;
-    --mrll-orange: #cb4b16;
-    --mrll-red: #dc322f;
-    --mrll-magenta: #d33682;
-    --mrll-violet: #6c71c4;
-    --mrll-blue: #268bd2;
-    --mrll-cyan: #2aa198;
-    --mrll-green: #859900;
+	--mrll-yellow: #b58900;
+	--mrll-orange: #cb4b16;
+	--mrll-red: #dc322f;
+	--mrll-magenta: #d33682;
+	--mrll-violet: #6c71c4;
+	--mrll-blue: #268bd2;
+	--mrll-cyan: #2aa198;
+	--mrll-green: #859900;
 }
