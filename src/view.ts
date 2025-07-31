@@ -99,7 +99,6 @@ export function buildMirallViewPlugin(plugin: MirallPlugin) {
 			buildDecorations(view: EditorView): DecorationSet {
 				const builder = new RangeSetBuilder<Decoration>();
 				const selection = view.state.selection.main;
-				console.log(view.dom.parentElement);
 				const isSourceMode =
 					!view.dom.parentElement?.classList.contains(
 						"is-live-preview",
