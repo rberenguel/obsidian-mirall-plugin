@@ -29,7 +29,7 @@ mirall-id: ${newMirallId}
 				return;
 			}
 
-			new MirallChooserModal(plugin.app, plugin, (page) => {
+			new MirallChooserModal(plugin.app, plugin, async (page) => {
 				const pageFile = plugin.app.vault.getAbstractFileByPath(
 					page.path,
 				);
@@ -40,20 +40,43 @@ mirall-id: ${newMirallId}
 					return;
 				}
 
-				plugin.app.vault.read(pageFile).then((content) => {
-					const cache =
-						plugin.app.metadataCache.getFileCache(pageFile);
-					const pageId = cache?.frontmatter
-						? cache.frontmatter["mirall-id"]
-						: undefined;
+				const cache = plugin.app.metadataCache.getFileCache(pageFile);
+				const pageId = cache?.frontmatter
+					? cache.frontmatter["mirall-id"]
+					: undefined;
 
-					if (!pageId) {
-						new Notice(
-							"Page ID not found in page file's frontmatter.",
-						);
-						return;
+				if (!pageId) {
+					new Notice("Page ID not found in page file's frontmatter.");
+					return;
+				}
+
+				// Check if the chosen file is the current active file
+				if (page.path === file.path) {
+					const dummyBlockId = `^mrll-${pageId}-${Date.now().toString(36)}`; // Use pageId for dummy block
+					const selection = editor.getSelection();
+
+					if (selection) {
+						const lines = selection.split("\n");
+						for (let i = 0; i < lines.length; i++) {
+							const line = lines[i];
+							if (line.trim() === "") continue;
+							lines[i] = `${line} ${dummyBlockId}`;
+						}
+						editor.replaceSelection(lines.join("\n"));
+					} else {
+						const cursor = editor.getCursor();
+						const line = editor.getLine(cursor.line);
+						const newLine =
+							line.trim() === ""
+								? `${dummyBlockId}`
+								: `${line} ${dummyBlockId}`;
+						editor.setLine(cursor.line, newLine);
 					}
+					new Notice("Added project reference to current file.");
+					return; // Exit without adding transclusion
+				}
 
+				plugin.app.vault.read(pageFile).then((content) => {
 					const selection = editor.getSelection();
 					const blockIds = [];
 

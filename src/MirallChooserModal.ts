@@ -15,14 +15,17 @@ export class MirallChooserModal extends FuzzySuggestModal<TFile> {
 			.split(",")
 			.map((s) => s.trim())
 			.filter(Boolean);
-		return this.app.vault.getMarkdownFiles().filter((file) => {
-			const frontmatter =
-				this.app.metadataCache.getFileCache(file)?.frontmatter;
-			if (!frontmatter || !frontmatter.mirall) {
-				return false;
-			}
-			return !excludedStates.includes(frontmatter.mirall);
-		});
+		return this.app.vault
+			.getMarkdownFiles()
+			.filter((file) => {
+				const frontmatter =
+					this.app.metadataCache.getFileCache(file)?.frontmatter;
+				if (!frontmatter || !frontmatter.mirall) {
+					return false;
+				}
+				return !excludedStates.includes(frontmatter.mirall);
+			})
+			.sort((a, b) => a.basename.localeCompare(b.basename));
 	}
 
 	getItemText(item: TFile): string {
