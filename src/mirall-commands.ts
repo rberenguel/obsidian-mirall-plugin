@@ -65,9 +65,24 @@ mirall-id: ${newMirallId}
 					);
 					await plugin.app.vault.modify(pageFile, newPageContent);
 
+					const originalCursorLine = cursor.line;
+					const originalCursorCh = cursor.ch;
+
 					const lines = editor.getValue().split("\n");
-					lines.splice(cursor.line, 1);
+					lines.splice(originalCursorLine, 1);
 					editor.setValue(lines.join("\n"));
+
+					// Restore cursor position
+					// If the removed line was the last line, move cursor to the end of the previous line.
+					// Otherwise, move cursor to the beginning of the new line at the original position.
+					if (originalCursorLine >= lines.length) {
+						editor.setCursor(
+							lines.length - 1,
+							lines[lines.length - 1].length,
+						);
+					} else {
+						editor.setCursor(originalCursorLine, 0);
+					}
 
 					new Notice(`Moved line to ${pageFile.basename}.`);
 				} else {
@@ -187,9 +202,8 @@ mirall-id: ${newMirallId}
 							let insertionLine = endOfSectionIndex;
 							while (
 								insertionLine > headerLineIndex + 1 &&
-								fileContentLines[
-									insertionLine - 1
-								].trim() === ""
+								fileContentLines[insertionLine - 1].trim() ===
+									""
 							) {
 								insertionLine--;
 							}
@@ -221,10 +235,7 @@ mirall-id: ${newMirallId}
 								cache?.frontmatterPosition?.end?.offset;
 
 							if (frontmatterEnd) {
-								const before = content.slice(
-									0,
-									frontmatterEnd,
-								);
+								const before = content.slice(0, frontmatterEnd);
 								const after = content.slice(frontmatterEnd);
 								newContent = `${before}\n\n${headerWithNewline}${transclusionsText}${after}`;
 							} else {
