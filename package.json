@@ -1,6 +1,6 @@
 {
 	"name": "mirall",
-	"version": "0.2.4",
+	"version": "0.2.5",
 	"description": "A plugin for Obsidian to link notes to pages.",
 	"main": "main.js",
 	"scripts": {
